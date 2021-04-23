@@ -8,5 +8,34 @@
 </head>
 <body>
     <h1>Hi from here!</h1>
+    <input type="text" id="url">
+    <button onclick="shorten()">shorten</button>
+    <a id="shorten"></a>
+
+<script>
+    let URL, shortenedText;
+
+    window.onload = () => {
+        URL = document.getElementById('URL');
+        shortenedText = document.getElementById('shorten');
+    }
+
+    async function shorten() {
+        const response = await fetch('/api/v1', {
+            method: "POST",
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                URL:URL
+            })
+        })
+
+        const shortened = location.host + "/@" + await response.text()
+
+        shortenedText.href = shortened;
+        shortenedText.innerText = shortened;
+    }
+</script>
 </body>
 </html>
