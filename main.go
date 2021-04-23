@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -41,6 +42,18 @@ func shortenHandler(ctx *fiber.Ctx) error {
 	return ctx.SendString(id)
 }
 
+func resolveURL(ctx *fiber.Ctx) error {
+	URL, err := db.Get([]byte(ctx.Params("URL")))
+
+	fmt.Println(URL)
+
+	if err != nil {
+		return err
+	}
+
+	return ctx.Redirect(string(URL))
+}
+
 func main() {
 	db, _ = bitcask.Open("db")
 	app := fiber.New()
@@ -50,6 +63,8 @@ func main() {
 	})
 
 	app.Post("/api/v1", shortenHandler)
+
+	app.Get("/@:URL", resolveURL)
 
 	log.Fatal(app.Listen(":3000"))
 }
