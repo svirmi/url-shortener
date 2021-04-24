@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,43 +14,38 @@ type shorten struct {
 	URL string
 }
 
+func resolveURL(ctx *fiber.Ctx) error {
+	URL, error := db.Get([]byte(ctx.Params("URL")))
+	if error != nil {
+		return error
+	}
+
+	return ctx.Redirect(string(URL))
+}
+
 func shortenHandler(ctx *fiber.Ctx) error {
-	var id string
-
 	set := new(shorten)
-	err := ctx.BodyParser(&set)
 
+	err := ctx.BodyParser(&set)
 	if err != nil {
 		return err
 	}
 
+	var id string
 	for {
-		id = uuid.NewString()[:5]
+		id = uuid.New().String()[:5]
 		if _, err := db.Get([]byte(id)); err != nil {
-			// exit the loop if no such an ID in db
+			//If this ID doesn't already exist, break from this loop
 			break
 		}
 	}
 
 	err = db.Put([]byte(id), []byte(set.URL))
-
 	if err != nil {
 		return err
 	}
 
 	return ctx.SendString(id)
-}
-
-func resolveURL(ctx *fiber.Ctx) error {
-	URL, err := db.Get([]byte(ctx.Params("URL")))
-
-	fmt.Println(URL)
-
-	if err != nil {
-		return err
-	}
-
-	return ctx.Redirect(string(URL))
 }
 
 func main() {
@@ -63,7 +57,6 @@ func main() {
 	})
 
 	app.Post("/api/v1", shortenHandler)
-
 	app.Get("/@:URL", resolveURL)
 
 	log.Fatal(app.Listen(":3000"))

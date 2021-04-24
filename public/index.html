@@ -16,7 +16,7 @@
     let URL, shortenedText;
 
     window.onload = () => {
-        URL = document.getElementById('URL');
+        URL = document.getElementById('url');
         shortenedText = document.getElementById('shorten');
     }
 
@@ -27,11 +27,13 @@
                 'content-type': 'application/json'
             },
             body: JSON.stringify({
-                URL:URL
+                URL:URL.value
             })
         })
 
-        const shortened = location.host + "/@" + await response.text()
+        const shortened = location.host + "/@" + await response.text();
+
+        console.log(shortened);
 
         shortenedText.href = shortened;
         shortenedText.innerText = shortened;
